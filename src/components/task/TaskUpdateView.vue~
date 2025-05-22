@@ -1,0 +1,120 @@
+<script setup lang="ts">
+import { reactive, ref, onMounted } from "vue";
+import AppButton from "../ui/AppButton.vue";
+import { useRoute, useRouter } from "vue-router";
+import { useTaskStore } from "../../stores/taskStore";
+
+const taskStore = useTaskStore();
+const route = useRoute();
+const router = useRouter();
+
+const task = reactive({
+  id: '',
+  title: '',
+  description: '',
+  deadline: '',
+  priority: '',
+  createdBy: {
+    name: '',
+    email: '',
+  },
+  username: '',
+});
+
+const errors = reactive({
+  title: '',
+  description: '',
+  deadline: '',
+  priority: '',
+  username: '',
+});
+
+const isLoading = ref(false);
+const successMessage = ref('');
+const priorities = ['Low', 'Medium', 'High'];
+
+const validateForm = () => {
+  let isValid = true;
+  // ... your validation logic here (same as before)
+  if (!task.title) {
+    errors.title = 'Title is required';
+    isValid = false;
+  } else {
+    errors.title = '';
+  }
+  // ... (same for other fields)
+  if (!task.username) {
+    errors.username = 'Username is required';
+    isValid = false;
+  } else {
+    errors.username = '';
+  }
+  return isValid;
+}
+
+const loadTask = async () => {
+  isLoading.value = true;
+  try {
+    const taskId = route.params.id;
+    const fetchedTask = await taskStore.getTaskById(taskId);
+    Object.assign(task, fetchedTask);
+  } catch (error) {
+    console.error('Failed to load task:', error);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+const submitForm = async () => {
+  if (!validateForm()) {
+    return;
+  }
+
+  isLoading.value = true;
+  successMessage.value = '';
+
+  try {
+    await taskStore.updateTask(task);
+    successMessage.value = 'Task updated successfully! Redirecting...';
+
+    setTimeout(() => {
+      router.push({ name: 'TaskList' });
+    }, 1500);
+
+  } catch (error) {
+    console.error('Failed to update task:', error);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+onMounted(() => {
+  loadTask();
+});
+</script>
+
+<template>
+  <div class="task-card">
+    <h2>Update Task</h2>
+
+    <form @submit.prevent="submitForm">
+
+
+      <app-button class="btn btn-primary" :is-loading="isLoading" type="submit">
+        Update Task
+      </app-button>
+    </form>
+
+    <p v-if="successMessage" class="success-msg">{{ successMessage }}</p>
+  </div>
+</template>
+
+<style scoped>
+
+
+.success-msg {
+  margin-top: 1em;
+  color: green;
+  font-weight: 600;
+}
+</style>

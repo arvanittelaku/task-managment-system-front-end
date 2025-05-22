@@ -1,0 +1,15 @@
+import {defineStore} from "pinia";
+import taskService from "../services/taskService.js";
+
+export const useTaskStore = defineStore('task', {
+    state: () => ({
+        tasks: [],
+        loading: false,
+        error: null
+    }),
+    actions: {
+        async getTasks() {
+            this.tasks = await taskService.getTasks();
+        }
+    }
+});

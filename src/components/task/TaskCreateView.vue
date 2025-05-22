@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import {reactive, ref} from "vue";
 import AppButton from "../ui/AppButton.vue";
+import axios from "axios";
+import {useTaskStore} from "../../stores/taskStore";
+
+
+const taskStore = useTaskStore();
 
 const task = reactive({
   title: '',
@@ -62,7 +67,27 @@ const submitForm = async () => {
   isLoading.value = true;
 
   try {
-    const response = await axios.post
+    const taskStore = useTaskStore();
+    await taskStore.createTask(task);
+    isLoading.value = false;
+    task.title = '';
+    task.description = '';
+    task.deadline = '';
+    task.priority = '';
+    task.createdBy = {
+      name: '',
+      email: '',
+    };
+    task.username = '';
+    errors.title = '';
+    errors.description = '';
+    errors.deadline = '';
+    errors.priority = '';
+    errors.username = '';
+  } catch (error) {
+    console.error(error);
+  }finally {
+    isLoading.value = false;
   }
 
 }

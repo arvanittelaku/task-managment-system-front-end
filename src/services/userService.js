@@ -1,0 +1,38 @@
+import client from "../helpers/client.js";
+
+class UserService {
+    async registerUser(user) {
+        const response = await client.post('/users', user);
+        return response.data;
+    }
+    async getAllManagers() {
+        const response = await client.get('/managers');
+        return response.data;
+    }
+    async deleteUserById(id) {
+        const response = await client.delete(`/users/${id}`);
+        return response.data;
+    }
+    async registerManager(manager) {
+        const response = await client.post('/register/manager', manager);
+        return response.data;
+    }
+    async getUserById(id) {
+        const response = await client.get(`/users/${id}`);
+        return response.data;
+    }
+    async getAllByRole(role) {
+        const response = await client.get(`/users/by-role?role=${role}`);
+        return response.data;
+    }
+    async getUserByUsername(username) {
+        const response = await client.get(`/users/username/${username}`);
+        return response.data;
+    }
+    async updateUser(user) {
+        const response = await client.put(`/users/update/`, user);
+        return response.data;
+    }
+}
+
+export default new UserService();

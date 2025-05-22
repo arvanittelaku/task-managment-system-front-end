@@ -1,0 +1,20 @@
+import { createRouter, createWebHistory } from 'vue-router'
+
+
+const routes = [
+    {
+        path: '/users',
+        component: 'UserList.vue',
+        meta: {requiresAuth: true},
+    },
+    {
+        path: '/managers',
+        component: 'ManagerList.vue',
+        meta: {requiresAuth: true},
+    }
+]
+const router = createRouter({
+    history: createWebHistory(),
+    routes,
+})
+export default router
