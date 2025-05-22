@@ -35,35 +35,63 @@ const priorities = ['Low', 'Medium', 'High'];
 
 const validateForm = () => {
   let isValid = true;
-  // ... your validation logic here (same as before)
+
   if (!task.title) {
     errors.title = 'Title is required';
     isValid = false;
   } else {
     errors.title = '';
   }
-  // ... (same for other fields)
+
+  if (!task.description) {
+    errors.description = 'Description is required';
+    isValid = false;
+  } else {
+    errors.description = '';
+  }
+
+  if (!task.deadline) {
+    errors.deadline = 'Deadline is required';
+    isValid = false;
+  } else {
+    errors.deadline = '';
+  }
+
+  if (!task.priority) {
+    errors.priority = 'Priority is required';
+    isValid = false;
+  } else {
+    errors.priority = '';
+  }
+
   if (!task.username) {
     errors.username = 'Username is required';
     isValid = false;
   } else {
     errors.username = '';
   }
+
   return isValid;
-}
+};
 
 const loadTask = async () => {
   isLoading.value = true;
   try {
-    const taskId = route.params.id;
-    const fetchedTask = await taskStore.getTaskById(taskId);
-    Object.assign(task, fetchedTask);
+    const taskId = Number(route.params.id);
+    const response = await taskStore.getTaskById(taskId);
+
+    if (response != null) {
+      Object.assign(task, response); // Prefills task with existing data
+    } else {
+      console.error('Task not found');
+    }
+
   } catch (error) {
     console.error('Failed to load task:', error);
   } finally {
     isLoading.value = false;
   }
-}
+};
 
 const submitForm = async () => {
   if (!validateForm()) {
@@ -74,7 +102,7 @@ const submitForm = async () => {
   successMessage.value = '';
 
   try {
-    await taskStore.updateTask(task);
+    await taskStore.updateTask(task); // Sends full updated task
     successMessage.value = 'Task updated successfully! Redirecting...';
 
     setTimeout(() => {
@@ -86,7 +114,7 @@ const submitForm = async () => {
   } finally {
     isLoading.value = false;
   }
-}
+};
 
 onMounted(() => {
   loadTask();
@@ -94,27 +122,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="task-card">
-    <h2>Update Task</h2>
-
-    <form @submit.prevent="submitForm">
-
-
-      <app-button class="btn btn-primary" :is-loading="isLoading" type="submit">
-        Update Task
-      </app-button>
-    </form>
-
-    <p v-if="successMessage" class="success-msg">{{ successMessage }}</p>
-  </div>
-</template>
-
-<style scoped>
-
-
-.success-msg {
-  margin-top: 1em;
-  color: green;
-  font-weight: 600;
-}
-</style>
+  <div class="container mt-4">
+    <h2 class="mb-4">Update Task</h2>
+    <form @submit.prevent="submitForm" novalidate>
+      <div class="mb-3">
+        <label for="title" class="form-label">Title:</label>
+        <input
+            type="text"
+            id="title"
+            v-model="task.title"
+            :class="['form-control', errors.title ? 'is-invalid' : '']"
+            placeholder="Enter task title"
+            required

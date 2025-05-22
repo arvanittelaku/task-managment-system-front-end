@@ -6,7 +6,7 @@ import App from "../App.vue";
 
 const routes = [
     {
-      path: '/',redirect: App
+      path: '/',redirect: 'LoginView'
     },
     {
         path: '/users',

@@ -72,22 +72,26 @@ const validateForm = () => {
   }
 
   return isValid;
-}
+};
 
 const loadTask = async () => {
   isLoading.value = true;
   try {
-    const taskId = route.params.id;
-    const fetchedTask = await taskStore.getTaskById(taskId);
-    if (fetchedTask) {
-      Object.assign(task, fetchedTask);
+    const taskId = Number(route.params.id);
+    const response = await taskStore.getTaskById(taskId);
+
+    if (response != null) {
+      Object.assign(task, response); // Prefills task with existing data
+    } else {
+      console.error('Task not found');
     }
+
   } catch (error) {
     console.error('Failed to load task:', error);
   } finally {
     isLoading.value = false;
   }
-}
+};
 
 const submitForm = async () => {
   if (!validateForm()) {
@@ -98,7 +102,7 @@ const submitForm = async () => {
   successMessage.value = '';
 
   try {
-    await taskStore.updateTask(task);
+    await taskStore.updateTask(task); // Sends full updated task
     successMessage.value = 'Task updated successfully! Redirecting...';
 
     setTimeout(() => {
@@ -110,7 +114,7 @@ const submitForm = async () => {
   } finally {
     isLoading.value = false;
   }
-}
+};
 
 onMounted(() => {
   loadTask();
@@ -213,5 +217,5 @@ onMounted(() => {
 </template>
 
 <style scoped>
-
+/* Optional scoped styles */
 </style>

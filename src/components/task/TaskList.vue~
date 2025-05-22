@@ -17,7 +17,7 @@ const statusTitles = {
 
 const statusOptions = [
   { value: "PENDING", label: "PENDING" },
-  { value: "IN_PROGRESS", label: "IN_PROGRESS" },  // fixed here
+  { value: "PENDING", label: "IN_PROGRESS" },
   { value: "COMPLETED", label: "COMPLETED" },
   { value: "CANCELED", label: "CANCELED" },
 ];
@@ -73,7 +73,7 @@ const changeStatus = async (task, newStatus) => {
             <select
                 class="form-select form-select-sm w-auto ms-2"
                 :value="task.status"
-                @change="changeStatus(task, $event.target.value)"
+                @change="changeStatus(task, $event.target.)"
             >
               <option
                   v-for="statusOption in statusOptions"
