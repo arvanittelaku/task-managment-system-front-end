@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import UserList from "../components/user/UserList.vue";
 import ManagerList from "../components/user/ManagerList.vue";
+import App from "../App.vue";
 
 
 const routes = [
     {
-      path: '/',redirect: '/users'
+      path: '/',redirect: App
     },
     {
         path: '/users',
@@ -16,11 +17,11 @@ const routes = [
         path: '/managers',
         component: ManagerList,
         meta: {requiresAuth: true},
-    },{
-     path:'tasks',
-     component:'TaskList.vue',
-     meta: {requiresAuth: true},
-    },
+     }//,{
+    //  path:'tasks',
+    //  component:'TaskList.vue',
+    //  meta: {requiresAuth: true},
+    // },
 
 ]
 const router = createRouter({

@@ -21,6 +21,7 @@ const routes = [
      component:'TaskList.vue',
      meta: {requiresAuth: true},
     },
+
 ]
 const router = createRouter({
     history: createWebHistory(),

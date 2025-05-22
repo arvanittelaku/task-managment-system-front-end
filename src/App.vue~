@@ -3,7 +3,7 @@ import Navbar_Admin from "./components/Navbar_Admin.vue";
 </script>
 
 <template>
- <navbar_-admin />
+ <Navbar />
 </template>
 
 <style scoped>
