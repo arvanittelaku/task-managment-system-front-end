@@ -52,5 +52,14 @@ const taskRouter = createRouter({
 
     ]
 })
+taskRouter.beforeEach((to, from, next) => {
+    const authStore = useAuthStore();
+
+    if (to.meta.requiresAuth && !authStore.isLoggedIn()) {
+        next('/login');
+    } else {
+        next();
+    }
+});
 
 export default taskRouter

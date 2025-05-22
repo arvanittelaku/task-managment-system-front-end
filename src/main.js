@@ -1,17 +1,19 @@
-import { createApp } from 'vue'
-import App from './App.vue'
+import { createApp } from 'vue';
+import App from './App.vue';
+import { createPinia } from 'pinia';
+import taskRouter from "./routers/taskRouter.js"; // Adjust the path if needed
 
-// Import Bootstrap CSS and Bootstrap JS (for interactive components)
-import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'  // Add this line if you want Bootstrap JS features
+// Import Bootstrap CSS and JS
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-// Import global styles (optional, keep if you want your own styles)
-import './style.css'
+// Optional: custom styles
+import './style.css';
 
-const app = createApp(App)
+const app = createApp(App);
 
-// If you use Vue Router or Pinia, you'd do:
-// app.use(router)
-// app.use(pinia)
+// 🧠 Register Pinia and Router
+app.use(createPinia());
+app.use(taskRouter);
 
-app.mount('#app')
+app.mount('#app');
