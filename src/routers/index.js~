@@ -1,34 +1,56 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import UserList from "../components/user/UserList.vue";
 import ManagerList from "../components/user/ManagerList.vue";
-import App from "../App.vue";
-
+import UpdateUserView from "../components/user/UpdateUserView.vue";
+import LoginView from "../components/LoginView.vue";
+import TaskList from "../components/task/TaskList.vue";
 
 const routes = [
     {
-      path: '/',redirect: 'LoginView'
+        path: '/',
+        component: LoginView, // ✅ Now uses your real login page
+        name: 'login',
+        meta: { requiresAuth: false }
     },
     {
         path: '/users',
         component: UserList,
-        meta: {requiresAuth: true},
+        name: 'users',
+        meta: { requiresAuth: true }
     },
     {
         path: '/managers',
         component: ManagerList,
-        meta: {requiresAuth: true},
-     },
+        name: 'managers',
+        meta: { requiresAuth: true }
+    },
     {
-        path:'/update'
-    }//,{
-    //  path:'tasks',
-    //  component:'TaskList.vue',
-    //  meta: {requiresAuth: true},
-    // },
-
+        path: '/users/update/:id',
+        component: UpdateUserView,
+        name: 'update-user',
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/tasks',
+        component: TaskList,
+        name: 'tasks',
+        meta: { requiresAuth: true }
+    }
 ]
+
 const router = createRouter({
     history: createWebHistory(),
-    routes,
+    routes
 })
+
+// Optional: Navigation guard
+router.beforeEach((to, from, next) => {
+    const isAuthenticated = !!localStorage.getItem('token') 
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        next('/')
+    } else {
+        next()
+    }
+})
+
 export default router

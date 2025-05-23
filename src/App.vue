@@ -1,11 +1,7 @@
-<script setup>
-import Navbar_Admin from "./components/Navbar_Admin.vue";
-</script>
-
 <template>
- <navbar_-admin />
+<login-view/>
 </template>
 
-<style scoped>
-
-</style>
+<script setup>
+import LoginView from "./components/LoginView.vue";
+</script>

@@ -1,8 +1,9 @@
-import {createRouter} from "vue-router";
+import {createRouter, createWebHistory} from "vue-router";
 import TaskList from "../components/task/TaskList.vue";
 import TaskView from "../components/task/TaskView.vue";
 import TaskUpdateView from "../components/task/TaskUpdateView.vue";
 import TaskCreateView from "../components/task/TaskCreateView.vue";
+import DeleteTaskView from "../components/task/DeleteTaskView.vue";
 
 const taskRouter = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,7 +43,7 @@ const taskRouter = createRouter({
         {
             path: '/tasks/delete/:id',
             name: 'delete-task',
-            component: DeleteTask,
+            component: DeleteTaskView,
             meta: {
                 requiresAuth: true
             }

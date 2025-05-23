@@ -1,4 +1,4 @@
-import {createRouter} from "vue-router";
+import {createRouter, createWebHistory} from "vue-router";
 import TaskList from "../components/task/TaskList.vue";
 import TaskView from "../components/task/TaskView.vue";
 import TaskUpdateView from "../components/task/TaskUpdateView.vue";
@@ -55,7 +55,7 @@ const taskRouter = createRouter({
 taskRouter.beforeEach((to, from, next) => {
     const authStore = useAuthStore();
 
-    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    if (to.meta.requiresAuth && !authStore.isLoggedIn()) {
         next('/login');
     } else {
         next();
