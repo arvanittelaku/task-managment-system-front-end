@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import UserList from "../components/user/UserList.vue";
 import ManagerList from "../components/user/ManagerList.vue";
 import App from "../App.vue";
+import UpdateUserView from "../components/user/UpdateUserView.vue";
 
 
 const routes = [
@@ -17,7 +18,12 @@ const routes = [
         path: '/managers',
         component: ManagerList,
         meta: {requiresAuth: true},
-     }//,{
+     },
+    {
+        path:'/users/update/:id',
+        component: UpdateUserView,
+        meta: {requiresAuth: true}
+    }//,{
     //  path:'tasks',
     //  component:'TaskList.vue',
     //  meta: {requiresAuth: true},
