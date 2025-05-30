@@ -1,32 +1,38 @@
-import {defineStore} from "pinia";
-import {ref} from "vue";
-import client from "../helpers/client.js";
-import {jwtDecode} from "jwt-decode";
-
+import { defineStore } from "pinia";
+import { ref } from "vue";
+import authService from "../services/authService.js";
+import * as jwt_decode from "jwt-decode";
 
 export const useAuthStore = defineStore('auth', () => {
     const token = ref(localStorage.getItem('token') || null);
 
     const login = async (user) => {
-        const response = await client.post('/auth/login', user);
-        if (response.data){
-            token.value = response.data.token;
-            localStorage.setItem('token', response.data.token);
+        try {
+            const data = await authService.login(user);
+            if (data && data.token) {
+                token.value = data.token;
+                localStorage.setItem('token', data.token);
+            } else {
+                throw new Error('No token received');
+            }
+        } catch (err) {
+            console.error('Login failed:', err);
+            throw err;
         }
-    }
+    };
 
     const logout = () => {
         token.value = null;
         localStorage.removeItem('token');
-    }
+    };
 
     const isLoggedIn = () => {
         return !!token.value;
-    }
+    };
 
     const loggedInUser = () => {
-        return token.value ? jwtDecode(token.value) : null;
-    }
+        return token.value ? jwt_decode.default(token.value) : null;
+    };
 
-    return {token, login, logout, isLoggedIn, loggedInUser}
+    return { token, login, logout, isLoggedIn, loggedInUser };
 });

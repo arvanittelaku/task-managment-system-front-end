@@ -1,56 +1,120 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import UserList from "../components/user/UserList.vue";
-import ManagerList from "../components/user/ManagerList.vue";
-import UpdateUserView from "../components/user/UpdateUserView.vue";
-import LoginView from "../components/LoginView.vue";
-import TaskList from "../components/task/TaskList.vue";
+import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '../stores/authStore';
+
+// User-related components
+import UserList from '../components/user/UserList.vue';
+import ManagerList from '../components/user/ManagerList.vue';
+import UpdateUserView from '../components/user/UpdateUserView.vue';
+import LoginView from '../components/LoginView.vue';
+
+// Task-related components
+import TaskList from '../components/task/TaskList.vue';
+import TaskView from '../components/task/TaskView.vue';
+import TaskUpdateView from '../components/task/TaskUpdateView.vue';
+import TaskCreateView from '../components/task/TaskCreateView.vue';
+import DeleteTaskView from '../components/task/DeleteTaskView.vue';
 
 const routes = [
+    // Authentication Routes
     {
-        path: '/',
-        component: LoginView, // ✅ Now uses your real login page
+        path: '/login', // Explicitly define login path
         name: 'login',
+        component: LoginView,
         meta: { requiresAuth: false }
     },
     {
+        path: '/', // Set the root path to redirect to login or a default authenticated page
+        redirect: '/login', // Redirect to login as it seems to be your starting point
+    },
+
+    // User Management Routes
+    {
         path: '/users',
-        component: UserList,
         name: 'users',
+        component: UserList,
         meta: { requiresAuth: true }
     },
     {
         path: '/managers',
-        component: ManagerList,
         name: 'managers',
+        component: ManagerList,
         meta: { requiresAuth: true }
     },
     {
         path: '/users/update/:id',
-        component: UpdateUserView,
         name: 'update-user',
+        component: UpdateUserView,
         meta: { requiresAuth: true }
     },
+
+    // Task Management Routes
     {
         path: '/tasks',
-        component: TaskList,
         name: 'tasks',
-        meta: { requiresAuth: true }
-    }
-]
+        component: TaskList,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/tasks/:id',
+        name: 'view-task',
+        component: TaskView,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/tasks/update/:id',
+        name: 'update-task',
+        component: TaskUpdateView,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/tasks/create',
+        name: 'create-task',
+        component: TaskCreateView,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/tasks/delete/:id',
+        name: 'delete-task',
+        component: DeleteTaskView,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    // Catch-all 404 route (optional but good practice)
+    // {
+    //     path: '/:pathMatch(.*)*', // Matches all undefined routes
+    //     name: 'NotFound',
+    //     // Make sure you have a NotFound.vue component in src/components/
+    //     component: () => import('../components/NotFoundView.vue')
+    // }
+];
 
 const router = createRouter({
-    history: createWebHistory(),
-    routes
-})
+    history: createWebHistory(import.meta.env.BASE_URL), // Use import.meta.env.BASE_URL for Vite
+    routes,
+});
 
-// Optional: Navigation guard
+// Global Navigation Guard
 router.beforeEach((to, from, next) => {
-    const isAuthenticated = !!localStorage.getItem('token') // Replace with Pinia logic if needed
-    if (to.meta.requiresAuth && !isAuthenticated) {
-        next('/')
-    } else {
-        next()
-    }
-})
+    const authStore = useAuthStore(); // Access the Pinia store
 
-export default router
+    // Check if the route requires authentication AND the user is not logged in
+    if (to.meta.requiresAuth && !authStore.isLoggedIn()) {
+        next('/login'); // Redirect to login page
+    } else if (!to.meta.requiresAuth && authStore.isLoggedIn() && to.path === '/login') {
+        // If user is logged in and tries to go to /login, redirect to a dashboard/tasks
+        next('/tasks'); // Or whatever your main authenticated page is
+    } else {
+        next(); // Continue to the intended route
+    }
+});
+
+export default router;

@@ -7,63 +7,68 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 const loginUser = reactive({
-  username: '',
+  email: '',
   password: ''
 });
 
-const errors = reactive<{ username?: string; password?: string }>({});
+const errors = reactive<{ email?: string; password?: string }>({});
 
 function validateForm() {
-  errors.username = loginUser.username.trim() ? '' : 'Username is required';
+  errors.email = loginUser.email.trim() ? '' : 'Email is required';
   errors.password = loginUser.password.trim() ? '' : 'Password is required';
-  return !errors.username && !errors.password;
+  return !errors.email && !errors.password;
 }
 
 async function login() {
   if (!validateForm()) {
     return;
-  } else {
-    try {
-      await authStore.login(loginUser);
-      await router.push('/tasks');
-    } catch (error) {
-      console.error(error);
-    }
+  }
+  try {
+    await authStore.login(loginUser);
+    await router.push('/tasks');
+  } catch (error) {
+    console.error(error);
+    // Optionally: add UI error feedback here
   }
 }
 </script>
 
 <template>
-  <form @submit.prevent="login" class="login-form">
-    <div class="form-group">
-      <label for="username">Username:</label>
-      <input
-          type="text"
-          id="username"
-          v-model="loginUser.username"
-          autocomplete="username"
-      />
-      <p v-if="errors.username" style="color: red; margin: 0;">{{ errors.username }}</p>
-    </div>
+  <div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <form @submit.prevent="login" class="w-100" style="max-width: 400px;">
+      <div class="card p-4 shadow-sm">
+        <h3 class="text-center mb-4">Login</h3>
 
-    <div class="form-group">
-      <label for="password">Password:</label>
-      <input
-          type="password"
-          id="password"
-          v-model="loginUser.password"
-          autocomplete="current-password"
-      />
-      <p v-if="errors.password" style="color: red; margin: 0;">{{ errors.password }}</p>
-    </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email:</label>
+          <input
+              type="text"
+              id="email"
+              class="form-control"
+              v-model="loginUser.email"
+              autocomplete="email"
+          />
+          <div v-if="errors.email" class="text-danger small mt-1">{{ errors.email }}</div>
+        </div>
 
-    <button type="submit">Login</button>
-  </form>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password:</label>
+          <input
+              type="password"
+              id="password"
+              class="form-control"
+              v-model="loginUser.password"
+              autocomplete="current-password"
+          />
+          <div v-if="errors.password" class="text-danger small mt-1">{{ errors.password }}</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Login</button>
+      </div>
+    </form>
+  </div>
 </template>
 
 <style scoped>
-/* Optional: add some styling */
-.form-group {
-  margin-bottom: 1rem;
-}
+/* All styling handled by Bootstrap */
 </style>
