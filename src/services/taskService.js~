@@ -1,45 +1,40 @@
 import client from "../helpers/client.js";
 
 class TaskService {
-    // Get tasks for the currently logged-in user
     async getTasksForCurrentUser() {
-        const response = await client.get('/tasks/current-user/me'); // Updated to match backend logic using principal
-        return response.data;
+        const response = await client.get('/tasks/my-tasks');
+        // log response for debugging
+        console.log("API response for tasks:", response);
+        return response.data;  // adjust here if response shape differs
     }
 
-    // Create a new task
     async createTask(task) {
         const response = await client.post('/tasks', task);
         return response.data;
     }
 
-    // Update an existing task
     async updateTask(task) {
         const response = await client.put(`/tasks/${task.id}`, task);
         return response.data;
     }
 
-    // Delete a task by ID
     async deleteTask(id) {
         const response = await client.delete(`/tasks/${id}`);
         return response.data;
     }
 
-    // Get a single task by ID
     async getTaskById(id) {
         const response = await client.get(`/tasks/${id}`);
         return response.data;
     }
 
-    // Assign a task to a user
     async assignTask(taskId, userId) {
         const response = await client.post(`/tasks/assign/${taskId}/${userId}`);
         return response.data;
     }
 
-    // Update the status of a task
     async updateTaskStatus(taskId, newStatus) {
-        const response = await client.patch(`/tasks/status/${taskId}?newStatus=${newStatus}`);
+        const response = await client.patch(`/tasks/${taskId}/status?newStatus=${newStatus}`);
         return response.data;
     }
 }

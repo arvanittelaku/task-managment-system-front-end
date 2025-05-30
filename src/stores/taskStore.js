@@ -1,10 +1,10 @@
 import { defineStore } from "pinia";
 import taskService from "../services/taskService.js";
 
-export const useTaskStore = defineStore('task', {
+export const useTaskStore = defineStore("task", {
     state: () => ({
         tasks: [],
-        currentTask: null,   // <-- to store single task view
+        currentTask: null,
         loading: false,
         error: null,
     }),
@@ -13,9 +13,19 @@ export const useTaskStore = defineStore('task', {
             this.loading = true;
             this.error = null;
             try {
-                this.tasks = await taskService.getTasksForCurrentUser();
+                const tasks = await taskService.getTasksForCurrentUser();
+                if (tasks && Array.isArray(tasks)) {
+                    this.tasks = tasks;
+                } else if (tasks && tasks.data && Array.isArray(tasks.data)) {
+                    this.tasks = tasks.data;
+                } else if (tasks && tasks.tasks && Array.isArray(tasks.tasks)) {
+                    this.tasks = tasks.tasks;
+                } else {
+                    this.tasks = [];
+                }
             } catch (error) {
                 this.error = error;
+                this.tasks = [];
             } finally {
                 this.loading = false;
             }
@@ -50,7 +60,6 @@ export const useTaskStore = defineStore('task', {
             this.error = null;
             try {
                 await taskService.deleteTask(id);
-                // Refresh tasks after deletion
                 await this.getTasks();
             } catch (error) {
                 this.error = error;
@@ -72,34 +81,24 @@ export const useTaskStore = defineStore('task', {
             }
         },
 
-        async updateTaskStatus(task) {
-            this.loading = true;
-            this.error = null;
-            try {
-                await taskService.updateTaskStatus(task);
-            } catch (error) {
-                this.error = error;
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        async assignTask(task) {
-            this.loading = true;
-            this.error = null;
-            try {
-                await taskService.assignTask(task);
-            } catch (error) {
-                this.error = error;
-            } finally {
-                this.loading = false;
-            }
-        },
-
         clearCurrentTask() {
             this.currentTask = null;
             this.error = null;
             this.loading = false;
         },
-    }
+
+        async updateTaskStatus(taskId, newStatus) {
+            this.loading = true;
+            this.error = null;
+            try {
+                await taskService.updateTaskStatus(taskId, newStatus);
+            } catch (error) {
+                this.error = error;
+                throw error;  // rethrow to handle in component if needed
+            } finally {
+                this.loading = false;
+            }
+        },
+
+    },
 });

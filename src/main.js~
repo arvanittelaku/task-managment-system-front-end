@@ -1,7 +1,8 @@
+// src/main.js
 import { createApp } from 'vue';
 import App from './App.vue';
 import { createPinia } from 'pinia';
-import router from './routers/index.js'; // <-- CORRECTED PATH: from './routers' to './router'
+import router from './routers/index.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 

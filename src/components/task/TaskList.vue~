@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { onMounted, computed } from "vue";
 import { useTaskStore } from "../../stores/taskStore";
 
 const taskStore = useTaskStore();
 
-onMounted(() => {
-  taskStore.getTasks();
+onMounted(async () => {
+  await taskStore.getTasks();
+  console.log("Tasks loaded in component:", taskStore.tasks);
 });
 
 const statusTitles = {
@@ -17,75 +18,75 @@ const statusTitles = {
 
 const statusOptions = [
   { value: "PENDING", label: "PENDING" },
-  { value: "PENDING", label: "IN_PROGRESS" },
+  { value: "IN_PROGRESS", label: "IN_PROGRESS" },
   { value: "COMPLETED", label: "COMPLETED" },
   { value: "CANCELED", label: "CANCELED" },
 ];
 
-const tasksByStatus = computed(() => {
-  return {
-    pending: taskStore.tasks.filter((task) => task.status === "PENDING"),
-    inProgress: taskStore.tasks.filter((task) => task.status === "IN_PROGRESS"),
-    completed: taskStore.tasks.filter((task) => task.status === "COMPLETED"),
-    canceled: taskStore.tasks.filter((task) => task.status === "CANCELED"),
-  };
-});
+const tasksByStatus = computed(() => ({
+  pending: taskStore.tasks.filter((t) => t.status === "PENDING"),
+  inProgress: taskStore.tasks.filter((t) => t.status === "IN_PROGRESS"),
+  completed: taskStore.tasks.filter((t) => t.status === "COMPLETED"),
+  canceled: taskStore.tasks.filter((t) => t.status === "CANCELED"),
+}));
 
-const changeStatus = async (task, newStatus) => {
+function canChangeStatus(currentStatus: string, newStatus: string): boolean {
+  if (currentStatus === "CANCELED") return false;
+  if (currentStatus === "IN_PROGRESS" && newStatus === "PENDING") return false;
+  if (currentStatus === "COMPLETED" && newStatus === "PENDING") return false;
+  return true;
+}
+
+async function changeStatus(task, newStatus) {
   if (task.status === newStatus) return;
+
+  if (!canChangeStatus(task.status, newStatus)) {
+    alert(`Cannot change status from ${task.status} to ${newStatus}`);
+    return;
+  }
 
   try {
     const updatedTask = { ...task, status: newStatus };
-    await taskStore.updateTask(updatedTask);
+    await taskStore.updateTaskStatus(task.id);
     await taskStore.getTasks();
   } catch (error) {
     console.error(error);
+    alert("Failed to update task status");
   }
-};
+}
 </script>
 
 <template>
   <div class="container mt-4">
     <h2 class="mb-3">Tasks by Status</h2>
     <div class="row">
-      <div
-          class="col-md-3"
-          v-for="(tasks, statusKey) in tasksByStatus"
-          :key="statusKey"
-      >
+      <div class="col-md-3" v-for="(tasks, statusKey) in tasksByStatus" :key="statusKey">
         <h4>{{ statusTitles[statusKey] }}</h4>
         <ul class="list-group">
+          <li v-if="tasks.length === 0" class="list-group-item text-muted">
+            No {{ statusTitles[statusKey].toLowerCase() }} tasks
+          </li>
           <li
               v-for="task in tasks"
               :key="task.id"
               class="list-group-item d-flex justify-content-between align-items-center"
           >
             <div class="d-flex flex-column">
-              <!-- Task title as a router link -->
-              <router-link
-                  :to="{ name: 'TaskView', params: { id: task.id } }"
-                  class="text-decoration-none fw-bold"
-              >
+              <router-link :to="{ name: 'view-task', params: { id: task.id } }" class="text-decoration-none fw-bold">
                 {{ task.title }}
               </router-link>
-              <small class="text-muted">{{ task.username }}</small>
+              <small class="text-muted">{{ task.assignedTo?.username || "Unassigned" }}</small>
             </div>
             <select
                 class="form-select form-select-sm w-auto ms-2"
                 :value="task.status"
-                @change="changeStatus(task, $event.target.)"
+                @change="changeStatus(task, $event.target.value)"
+                :disabled="task.status === 'CANCELED'"
             >
-              <option
-                  v-for="statusOption in statusOptions"
-                  :key="statusOption.value"
-                  :value="statusOption.value"
-              >
+              <option v-for="statusOption in statusOptions" :key="statusOption.value" :value="statusOption.value">
                 {{ statusOption.label }}
               </option>
             </select>
-          </li>
-          <li v-if="tasks.length === 0" class="list-group-item text-muted">
-            No {{ statusTitles[statusKey].toLowerCase() }} tasks
           </li>
         </ul>
       </div>

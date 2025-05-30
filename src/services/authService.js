@@ -3,7 +3,7 @@ import client from "../helpers/client.js";
 class AuthService {
     async login(user) {
         const response = await client.post('/auth/login', user);
-        return response.data;  // expect { token: '...' }
+        return response.data;
     }
 }
 

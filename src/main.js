@@ -1,10 +1,8 @@
-// src/main.js
 import { createApp } from 'vue';
 import App from './App.vue';
 import { createPinia } from 'pinia';
-import router from './routers/index.js'; // <-- CHANGE THIS LINE: from './routers/index.js' to './router/index.js'
+import router from './routers/index.js';  // note: you named it routers (plural)
 import 'bootstrap/dist/css/bootstrap.min.css';
-
 
 const app = createApp(App);
 app.use(createPinia());

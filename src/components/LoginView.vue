@@ -1,34 +1,33 @@
 <script setup lang="ts">
-import { useAuthStore } from '../stores/authStore';
-import { useRouter } from 'vue-router';
 import { reactive } from "vue";
+import { useAuthStore } from "../stores/authStore";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
 const authStore = useAuthStore();
 
 const loginUser = reactive({
-  email: '',
-  password: ''
+  email: "",
+  password: "",
 });
 
 const errors = reactive<{ email?: string; password?: string }>({});
 
 function validateForm() {
-  errors.email = loginUser.email.trim() ? '' : 'Email is required';
-  errors.password = loginUser.password.trim() ? '' : 'Password is required';
+  errors.email = loginUser.email.trim() ? "" : "Email is required";
+  errors.password = loginUser.password.trim() ? "" : "Password is required";
   return !errors.email && !errors.password;
 }
 
 async function login() {
-  if (!validateForm()) {
-    return;
-  }
+  if (!validateForm()) return;
+
   try {
     await authStore.login(loginUser);
-    await router.push('/tasks');
+    await router.push("/tasks");
   } catch (error) {
-    console.error(error);
-    // Optionally: add UI error feedback here
+    console.error("Login failed:", error);
+    // Add UI error feedback here if needed
   }
 }
 </script>
@@ -70,5 +69,5 @@ async function login() {
 </template>
 
 <style scoped>
-/* All styling handled by Bootstrap */
+/* Bootstrap handles styling */
 </style>

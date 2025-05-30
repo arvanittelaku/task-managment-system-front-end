@@ -19,16 +19,17 @@ function validateForm() {
   return !errors.email && !errors.password;
 }
 
-async function login() {
+const login = async () => {
+  console.log('Login called!');
   if (!validateForm()) {
     return;
-  } else {
-    try {
-      await authStore.login(loginUser);
-      await router.push('/tasks');
-    } catch (error) {
-      console.error(error);
-    }
+  }
+  try {
+    await authStore.login(loginUser);
+    await router.push('/tasks');
+  } catch (error) {
+    console.error(error);
+    // Optionally: add UI error feedback here
   }
 }
 </script>
@@ -63,12 +64,12 @@ async function login() {
           <div v-if="errors.password" class="text-danger small mt-1">{{ errors.password }}</div>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Login</button>
+        <button type="submit" class="btn btn-primary w-100" @click="login">Login</button>
       </div>
     </form>
   </div>
 </template>
 
 <style scoped>
-/* No custom styles needed, all handled by Bootstrap */
+/* All styling handled by Bootstrap */
 </style>
