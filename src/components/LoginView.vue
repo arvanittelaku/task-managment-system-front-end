@@ -11,11 +11,13 @@ const loginUser = reactive({
   password: "",
 });
 
-const errors = reactive<{ email?: string; password?: string }>({});
+const errors = reactive<{ email?: string; password?: string; login?: string }>({});
+
 
 function validateForm() {
-  errors.email = loginUser.email.trim() ? "" : "Email is required";
-  errors.password = loginUser.password.trim() ? "" : "Password is required";
+  errors.login = "";
+  errors.email = loginUser.email.trim() ? "" : "Email is required!";
+  errors.password = loginUser.password.trim() ? "" : "Password is required!";
   return !errors.email && !errors.password;
 }
 
@@ -27,7 +29,7 @@ async function login() {
     await router.push("/tasks");
   } catch (error) {
     console.error("Login failed:", error);
-    // Add UI error feedback here if needed
+    errors.login = 'Wrong email or password. Please try again!'
   }
 }
 </script>
@@ -60,6 +62,7 @@ async function login() {
               autocomplete="current-password"
           />
           <div v-if="errors.password" class="text-danger small mt-1">{{ errors.password }}</div>
+          <div v-if="errors.login" class="text-danger small mt-1">{{ errors.login }}</div>
         </div>
 
         <button type="submit" class="btn btn-primary w-100">Login</button>

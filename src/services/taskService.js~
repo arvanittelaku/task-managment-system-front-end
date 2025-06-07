@@ -34,7 +34,9 @@ class TaskService {
     }
 
     async updateTaskStatus(taskId, newStatus) {
-        const response = await client.patch(`/tasks/${taskId}/status?newStatus=${newStatus}`);
+        const response = await client.patch(`/tasks/${taskId}/status`, {
+            status: newStatus
+        });
         return response.data;
     }
 }

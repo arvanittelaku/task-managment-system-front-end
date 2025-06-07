@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useTaskStore } from "../../stores/taskStore";
-import { useUserStore } from "../../stores/userStore";
+import { useAuthStore } from "../../stores/authStore"; // ✅ use authStore
+
 const route = useRoute();
 const router = useRouter();
 
 const taskStore = useTaskStore();
-const userStore = useUserStore();
+const authStore = useAuthStore();
 
 const taskId = Number(route.params.id);
 
@@ -16,8 +17,13 @@ const error = computed(() => taskStore.error);
 const task = computed(() => taskStore.currentTask);
 
 const canDelete = computed(() => {
-  if (!task.value || !userStore.currentUser) return false;
-  return task.value.createdBy?.id === userStore.currentUser.id;
+  const user = authStore.loggedInUser;
+  return user?.role === 'ADMIN' || task.value?.createdBy?.id === user?.id;
+});
+
+const canEdit = computed(() => {
+  const user = authStore.loggedInUser;
+  return user?.role === 'ADMIN' || task.value?.createdBy?.id === user?.id;
 });
 
 const loadTask = async () => {
@@ -29,7 +35,7 @@ const deleteTask = async () => {
   if (!confirm("Are you sure you want to delete this task?")) return;
 
   await taskStore.deleteTask(task.value.id);
-  router.push("/tasks");  // redirect after delete
+  await router.push("/tasks");
 };
 
 const updateTask = () => {
@@ -38,6 +44,12 @@ const updateTask = () => {
 
 onMounted(() => {
   loadTask();
+  console.log("Logged in user:", authStore.loggedInUser);
+  console.log('tasks:', taskStore.tasks);
+});
+
+watch(task, (newVal) => {
+  console.log("Loaded task:", newVal);
 });
 </script>
 
@@ -58,10 +70,17 @@ onMounted(() => {
       <p><strong>Deadline:</strong> {{ task.deadline }}</p>
       <p><strong>Priority:</strong> {{ task.priority }}</p>
       <p><strong>Status:</strong> {{ task.status }}</p>
-      <p><strong>Assigned To:</strong> {{ task.username }}</p>
-      <p><strong>Created By:</strong> {{ task.createdBy?.name }} ({{ task.createdBy?.email }})</p>
+      <p><strong>Assigned To:</strong> {{ task.assignedTo?.username }}</p>
+      <p><strong>Created By:</strong> {{ task.createdBy?.username }} ({{ task.createdBy?.email }})</p>
 
-      <button class="btn btn-primary me-2" @click="updateTask">Update</button>
+
+    <button
+          v-if="canEdit"
+          class="btn btn-primary me-2"
+          @click="updateTask"
+      >
+        Edit
+      </button>
 
       <button
           v-if="canDelete"

@@ -1,11 +1,15 @@
 import client from "../helpers/client.js";
 
 class TaskService {
+    async getAllTasks() {
+        const response = await client.get('/tasks');
+        return response.data;
+    }
+
     async getTasksForCurrentUser() {
         const response = await client.get('/tasks/my-tasks');
-        // log response for debugging
         console.log("API response for tasks:", response);
-        return response.data;  // adjust here if response shape differs
+        return response.data;
     }
 
     async createTask(task) {

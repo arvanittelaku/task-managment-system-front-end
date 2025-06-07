@@ -13,25 +13,32 @@ import TaskView from '../components/task/TaskView.vue';
 import TaskUpdateView from '../components/task/TaskUpdateView.vue';
 import TaskCreateView from '../components/task/TaskCreateView.vue';
 import DeleteTaskView from '../components/task/DeleteTaskView.vue';
+import RegisterUserView from "../components/user/RegisterUserView.vue";
 
 const routes = [
-    // Authentication Routes
+
     {
-        path: '/login', // Explicitly define login path
+        path: '/login',
         name: 'login',
         component: LoginView,
         meta: { requiresAuth: false }
     },
     {
-        path: '/', // Set the root path to redirect to login or a default authenticated page
-        redirect: '/login', // Redirect to login as it seems to be your starting point
+        path: '/',
+        redirect: '/login',
     },
 
-    // User Management Routes
+
     {
         path: '/users',
         name: 'users',
         component: UserList,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/users/create',
+        name: 'create-users',
+        component: RegisterUserView,
         meta: { requiresAuth: true }
     },
     {
@@ -50,7 +57,7 @@ const routes = [
     // Task Management Routes
     {
         path: '/tasks',
-        name: 'tasks',
+        name: 'all-tasks',
         component: TaskList,
         meta: {
             requiresAuth: true
@@ -98,7 +105,7 @@ const routes = [
 ];
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL), // Use import.meta.env.BASE_URL for Vite
+    history: createWebHistory(import.meta.env.BASE_URL),
     routes,
 });
 
@@ -107,9 +114,9 @@ router.beforeEach((to, from, next) => {
     const authStore = useAuthStore(); // Access the Pinia store
 
     // Check if the route requires authentication AND the user is not logged in
-    if (to.meta.requiresAuth && !authStore.isLoggedIn()) {
+    if (to.meta.requiresAuth && !authStore.isLoggedIn) {
         next('/login'); // Redirect to login page
-    } else if (!to.meta.requiresAuth && authStore.isLoggedIn() && to.path === '/login') {
+    } else if (!to.meta.requiresAuth && authStore.isLoggedIn && to.path === '/login') {
         // If user is logged in and tries to go to /login, redirect to a dashboard/tasks
         next('/tasks'); // Or whatever your main authenticated page is
     } else {

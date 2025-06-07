@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import taskService from "../services/taskService.js";
+import axios from "axios";
 
 export const useTaskStore = defineStore("task", {
     state: () => ({
@@ -14,15 +15,43 @@ export const useTaskStore = defineStore("task", {
             this.error = null;
             try {
                 const tasks = await taskService.getTasksForCurrentUser();
-                if (tasks && Array.isArray(tasks)) {
+                if (Array.isArray(tasks)) {
                     this.tasks = tasks;
-                } else if (tasks && tasks.data && Array.isArray(tasks.data)) {
+                } else if (tasks?.data && Array.isArray(tasks.data)) {
                     this.tasks = tasks.data;
-                } else if (tasks && tasks.tasks && Array.isArray(tasks.tasks)) {
+                } else if (tasks?.tasks && Array.isArray(tasks.tasks)) {
                     this.tasks = tasks.tasks;
                 } else {
                     this.tasks = [];
                 }
+            } catch (error) {
+                this.error = error;
+                this.tasks = [];
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async getAllTasks() {
+            this.loading = true;
+            this.error = null;
+            try {
+                const tasks = await taskService.getAllTasks();
+                this.tasks = Array.isArray(tasks) ? tasks : [];
+            } catch (error) {
+                this.error = error;
+                this.tasks = [];
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async getManagerTasks() {
+            this.loading = true;
+            this.error = null;
+            try {
+                const response = await axios.get("/api/tasks?createdBy=me");
+                this.tasks = Array.isArray(response.data) ? response.data : [];
             } catch (error) {
                 this.error = error;
                 this.tasks = [];
@@ -72,7 +101,9 @@ export const useTaskStore = defineStore("task", {
             this.loading = true;
             this.error = null;
             try {
-                this.currentTask = await taskService.getTaskById(id);
+                const response = await taskService.getTaskById(id);
+                console.log("Fetched task by ID:", response);
+                this.currentTask = response;
             } catch (error) {
                 this.error = error;
                 this.currentTask = null;
@@ -92,13 +123,13 @@ export const useTaskStore = defineStore("task", {
             this.error = null;
             try {
                 await taskService.updateTaskStatus(taskId, newStatus);
+                await this.getTasks();
             } catch (error) {
                 this.error = error;
-                throw error;  // rethrow to handle in component if needed
+                throw error;
             } finally {
                 this.loading = false;
             }
         },
-
     },
 });

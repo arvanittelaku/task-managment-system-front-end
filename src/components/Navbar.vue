@@ -17,10 +17,9 @@ const logout = () => {
 
 <template>
   <nav v-if="isLoggedIn" class="navbar navbar-expand-lg navbar-light bg-light px-4 ">
-    <div class="navbar-brand me-auto">Task System</div>
+    <div class="navbar-brand me-auto">Task Managment System</div>
 
     <div class="d-flex gap-2 ms-2">
-      <!-- ADMIN -->
       <router-link v-if="user && user?.role === 'ADMIN'" :to="{ name: 'create-users' }" class="btn btn-outline-primary">Create Managers</router-link>
       <router-link v-if="user && user?.role === 'ADMIN'" :to="{ name: 'managers' }" class="btn btn-outline-primary">Managers</router-link>
       <router-link v-if="user && user?.role === 'ADMIN'" :to="{ name: 'create-users' }" class="btn btn-outline-primary">Create Users</router-link>
