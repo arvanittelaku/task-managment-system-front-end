@@ -1,10 +1,22 @@
-import { createApp } from 'vue';
-import App from './App.vue';
-import { createPinia } from 'pinia';
-import router from './routers/index.js';  // note: you named it routers (plural)
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap/dist/css/bootstrap.min.css";
+import { createApp } from "vue";
+import App from "./App.vue";
+import { createPinia } from "pinia";
+import router from "./routers/index.js";
+import { useAuthStore } from "./stores/authStore";
 
 const app = createApp(App);
-app.use(createPinia());
+const pinia = createPinia();
+
+app.use(pinia);
 app.use(router);
-app.mount('#app');
+
+async function startApp() {
+    const authStore = useAuthStore();
+    await authStore.initialize(); // wait for auth state to load
+
+    await router.isReady();
+    app.mount("#app");
+}
+
+startApp();

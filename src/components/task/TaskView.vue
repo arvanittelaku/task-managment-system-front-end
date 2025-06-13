@@ -2,7 +2,7 @@
 import { onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useTaskStore } from "../../stores/taskStore";
-import { useAuthStore } from "../../stores/authStore"; // ✅ use authStore
+import { useAuthStore } from "../../stores/authStore";
 
 const route = useRoute();
 const router = useRouter();
@@ -16,14 +16,36 @@ const isLoading = computed(() => taskStore.loading);
 const error = computed(() => taskStore.error);
 const task = computed(() => taskStore.currentTask);
 
+// Correctly use authStore.role and authStore.userId/user
 const canDelete = computed(() => {
-  const user = authStore.loggedInUser;
-  return user?.role === 'ADMIN' || task.value?.createdBy?.id === user?.id;
+  const currentUserRole = authStore.role;
+  const currentUserId = authStore.userId;
+  // Admin can delete any task
+  if (currentUserRole === 'ADMIN') {
+    return true;
+  }
+  // Manager can delete tasks they created
+  if (currentUserRole === 'MANAGER') {
+    return task.value?.createdBy?.id === currentUserId;
+  }
+  // User cannot delete tasks
+  return false;
 });
 
+// Correctly use authStore.role and authStore.userId/user
 const canEdit = computed(() => {
-  const user = authStore.loggedInUser;
-  return user?.role === 'ADMIN' || task.value?.createdBy?.id === user?.id;
+  const currentUserRole = authStore.role;
+  const currentUserId = authStore.userId;
+  // Admin can edit any task
+  if (currentUserRole === 'ADMIN') {
+    return true;
+  }
+  // Manager can edit tasks they created
+  if (currentUserRole === 'MANAGER') {
+    return task.value?.createdBy?.id === currentUserId;
+  }
+  // User cannot edit tasks
+  return false;
 });
 
 const loadTask = async () => {
@@ -35,22 +57,27 @@ const deleteTask = async () => {
   if (!confirm("Are you sure you want to delete this task?")) return;
 
   await taskStore.deleteTask(task.value.id);
-  await router.push("/tasks");
+  await router.push("/all-tasks");
 };
 
 const updateTask = () => {
-  router.push({ name: "TaskEdit", params: { id: taskId } });
+  router.push({ name: "update-task", params: { id: taskId } }); // Changed name to 'update-task' based on router config
 };
 
-onMounted(() => {
-  loadTask();
-  console.log("Logged in user:", authStore.loggedInUser);
-  console.log('tasks:', taskStore.tasks);
+onMounted(async () => {
+  try {
+    await taskStore.getTaskById(taskId);
+  } catch (error) {
+    if (error.response?.status === 403) {
+      alert("You are not allowed to view this task.");
+       await router.push("/all-tasks");
+    } else {
+      console.error("Unexpected error:", error);
+    }
+  }
 });
 
-watch(task, (newVal) => {
-  console.log("Loaded task:", newVal);
-});
+
 </script>
 
 <template>
@@ -73,8 +100,7 @@ watch(task, (newVal) => {
       <p><strong>Assigned To:</strong> {{ task.assignedTo?.username }}</p>
       <p><strong>Created By:</strong> {{ task.createdBy?.username }} ({{ task.createdBy?.email }})</p>
 
-
-    <button
+      <button
           v-if="canEdit"
           class="btn btn-primary me-2"
           @click="updateTask"

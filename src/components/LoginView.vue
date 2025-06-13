@@ -26,7 +26,7 @@ async function login() {
 
   try {
     await authStore.login(loginUser);
-    await router.push("/tasks");
+    await router.push("/all-tasks");
   } catch (error) {
     console.error("Login failed:", error);
     errors.login = 'Wrong email or password. Please try again!'

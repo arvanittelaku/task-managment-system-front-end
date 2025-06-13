@@ -31,7 +31,7 @@ const errors = reactive({
 
 const isLoading = ref(false);
 const successMessage = ref('');
-const priorities = ['Low', 'Medium', 'High'];
+const priorities = ['LOW', 'MEDIUM', 'HIGH'];
 
 const validateForm = () => {
   let isValid = true;
@@ -78,14 +78,13 @@ const loadTask = async () => {
   isLoading.value = true;
   try {
     const taskId = Number(route.params.id);
-    const response = await taskStore.getTaskById(taskId);
+    await taskStore.getTaskById(taskId);
 
-    if (response != null) {
-      Object.assign(task, response); // Prefills task with existing data
+    if (taskStore.currentTask) {
+      Object.assign(task, taskStore.currentTask);
     } else {
       console.error('Task not found');
     }
-
   } catch (error) {
     console.error('Failed to load task:', error);
   } finally {
@@ -94,21 +93,17 @@ const loadTask = async () => {
 };
 
 const submitForm = async () => {
-  if (!validateForm()) {
-    return;
-  }
+  if (!validateForm()) return;
 
   isLoading.value = true;
   successMessage.value = '';
 
   try {
-    await taskStore.updateTask(task); // Sends full updated task
+    await taskStore.updateTask(task);
     successMessage.value = 'Task updated successfully! Redirecting...';
-
     setTimeout(() => {
-      router.push({ name: 'TaskList' });
+      router.push({ name: 'all-tasks' });
     }, 1500);
-
   } catch (error) {
     console.error('Failed to update task:', error);
   } finally {
@@ -191,16 +186,6 @@ onMounted(() => {
         <div class="invalid-feedback">{{ errors.username }}</div>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Created By</label>
-        <input
-            type="text"
-            :value="task.createdBy?.name || ''"
-            class="form-control"
-            readonly
-        />
-      </div>
-
       <AppButton
           class="btn btn-primary"
           :is-loading="isLoading"
@@ -217,5 +202,5 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Optional scoped styles */
+/* Optional styles */
 </style>
